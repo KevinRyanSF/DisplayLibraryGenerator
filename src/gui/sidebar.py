@@ -89,8 +89,9 @@ class Sidebar(tk.Frame):
         self.context_menu = tk.Menu(self, tearoff=0, bg="#3c3f41", fg="white", activebackground="#cf3e3e")
         self.context_menu.add_command(label="Excluir Sprite", command=self._on_delete_clicked)
 
-        self.context_menu = tk.Menu(self, tearoff=0, bg="#3c3f41", fg="white", activebackground="#4b6eaf")
-        self.context_menu.add_command(label="Duplicar Sprite", command=self._on_duplicate_clicked)  # Nova opção
+        self.context_menu = tk.Menu(self, tearoff=0, bg="#3c3f41", fg="white", activebackground="#cf3e3e")
+        self.context_menu.add_command(label="Renomear Sprite", command=self._on_rename_clicked)  # Nova linha
+        self.context_menu.add_command(label="Duplicar Sprite", command=self._on_duplicate_clicked)
         self.context_menu.add_separator()
         self.context_menu.add_command(label="Excluir Sprite", command=self._on_delete_clicked)
 
@@ -110,6 +111,11 @@ class Sidebar(tk.Frame):
         selection = self.listbox.curselection()
         if selection:
             self.controller.action_duplicate_sprite(selection[0])
+
+    def _on_rename_clicked(self):
+        selection = self.listbox.curselection()
+        if selection:
+            self.controller.action_rename_sprite(selection[0])
 
     def update_list(self, sprites):
         self.listbox.delete(0, tk.END)

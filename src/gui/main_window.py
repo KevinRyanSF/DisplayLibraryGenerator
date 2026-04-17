@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 import copy
 import math
 from src.models import Sprite
@@ -271,6 +271,31 @@ class MainWindow:
         self.sidebar.listbox.selection_clear(0, tk.END)
         self.sidebar.listbox.selection_set(tk.END)
         self._load_sprite_to_view(new_sprite)
+
+    def action_rename_sprite(self, index):
+        sprite_to_rename = self.sprites[index]
+
+        # Abre uma janela pedindo o novo nome, já preenchida com o nome atual
+        novo_nome = simpledialog.askstring(
+            "Renomear Sprite",
+            "Digite o novo nome para o sprite:",
+            initialvalue=sprite_to_rename.name,
+            parent=self.root
+        )
+
+        if novo_nome:
+            # Substitui espaços por underscores para manter o código C válido
+            novo_nome = novo_nome.replace(" ", "_")
+            sprite_to_rename.name = novo_nome
+
+            # Atualiza a lista lateral
+            self.sidebar.update_list(self.sprites)
+
+            # Se o sprite que foi renomeado for o que está aberto na tela,
+            # atualiza também a caixa de texto de nome lá no menu lateral.
+            if self.current_sprite == sprite_to_rename:
+                self.sidebar.name_entry.delete(0, tk.END)
+                self.sidebar.name_entry.insert(0, novo_nome)
 
     def _load_sprite_to_view(self, sprite):
         self.current_sprite = sprite
