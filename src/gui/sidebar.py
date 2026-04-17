@@ -19,6 +19,7 @@ class Sidebar(tk.Frame):
 
         self._build_display_config()
         self._build_tools()
+        self._build_transformations()
         self._build_sprite_manager()
 
     def _build_display_config(self):
@@ -61,6 +62,17 @@ class Sidebar(tk.Frame):
         tk.Button(action_frame, text="Refazer", command=self.controller.action_redo).pack(side=tk.RIGHT, fill=tk.X,
                                                                                           expand=True, padx=(2, 0))
 
+    def _build_transformations(self):
+        f = tk.LabelFrame(self, text="Transformacoes", bg="#2b2b2b", fg="white", padx=5, pady=5)
+        f.pack(fill=tk.X, pady=(0, 10))
+
+        tk.Button(f, text="Girar 90", command=self.controller.action_rotate_90).pack(side=tk.LEFT, fill=tk.X,
+                                                                                     expand=True, padx=(0, 2))
+        tk.Button(f, text="Espelhar H", command=self.controller.action_flip_h).pack(side=tk.LEFT, fill=tk.X,
+                                                                                    expand=True, padx=(2, 2))
+        tk.Button(f, text="Espelhar V", command=self.controller.action_flip_v).pack(side=tk.LEFT, fill=tk.X,
+                                                                                    expand=True, padx=(2, 0))
+
     def _build_sprite_manager(self):
         sf = tk.Frame(self, bg="#2b2b2b")
         sf.pack(fill=tk.X, pady=5)
@@ -78,6 +90,9 @@ class Sidebar(tk.Frame):
         self.listbox.bind('<<ListboxSelect>>', self.controller.action_select_sprite)
         self.listbox.bind('<Button-3>', self._show_context_menu)
 
+        self.info_label = tk.Label(self, text="Tamanho: -- x --", bg="#2b2b2b", fg="#aaa")
+        self.info_label.pack(fill=tk.X, pady=(0, 5))
+
         self.name_entry = tk.Entry(self)
         self.name_entry.pack(fill=tk.X, pady=5)
 
@@ -87,10 +102,8 @@ class Sidebar(tk.Frame):
         tk.Button(self, text="Importar .h", command=self.controller.action_import).pack(fill=tk.X, pady=2)
 
         self.context_menu = tk.Menu(self, tearoff=0, bg="#3c3f41", fg="white", activebackground="#cf3e3e")
-        self.context_menu.add_command(label="Excluir Sprite", command=self._on_delete_clicked)
-
-        self.context_menu = tk.Menu(self, tearoff=0, bg="#3c3f41", fg="white", activebackground="#cf3e3e")
-        self.context_menu.add_command(label="Renomear Sprite", command=self._on_rename_clicked)  # Nova linha
+        self.context_menu.add_command(label="Renomear Sprite", command=self._on_rename_clicked)
+        self.context_menu.add_command(label="Redimensionar Sprite", command=self._on_resize_clicked)  # Nova linha
         self.context_menu.add_command(label="Duplicar Sprite", command=self._on_duplicate_clicked)
         self.context_menu.add_separator()
         self.context_menu.add_command(label="Excluir Sprite", command=self._on_delete_clicked)
@@ -116,6 +129,11 @@ class Sidebar(tk.Frame):
         selection = self.listbox.curselection()
         if selection:
             self.controller.action_rename_sprite(selection[0])
+
+    def _on_resize_clicked(self):
+        selection = self.listbox.curselection()
+        if selection:
+            self.controller.action_resize_sprite(selection[0])
 
     def update_list(self, sprites):
         self.listbox.delete(0, tk.END)

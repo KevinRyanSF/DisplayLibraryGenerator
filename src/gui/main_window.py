@@ -86,19 +86,27 @@ class MainWindow:
 
     def action_undo(self):
         if self.current_sprite and self.current_sprite.undo_stack:
-            # Pega o estado atual e joga na pilha de refazer
             self.current_sprite.redo_stack.append(copy.deepcopy(self.current_sprite.grid))
-            # Puxa o último estado salvo
             self.current_sprite.grid = self.current_sprite.undo_stack.pop()
-            self.canvas.refresh_colors(self.current_sprite)
+
+            # Recalcula a largura e altura, caso o usuário esteja desfazendo uma Rotação
+            self.current_sprite.height = len(self.current_sprite.grid)
+            self.current_sprite.width = len(self.current_sprite.grid[0])
+
+            # Usa draw_grid no lugar de refresh_colors para reestruturar a tela
+            self.canvas.draw_grid(self.current_sprite.width, self.current_sprite.height, self.current_sprite)
 
     def action_redo(self):
         if self.current_sprite and self.current_sprite.redo_stack:
-            # Pega o estado atual e devolve pra pilha de desfazer
             self.current_sprite.undo_stack.append(copy.deepcopy(self.current_sprite.grid))
-            # Puxa o estado do futuro
             self.current_sprite.grid = self.current_sprite.redo_stack.pop()
-            self.canvas.refresh_colors(self.current_sprite)
+
+            # Recalcula a largura e altura, caso o usuário esteja refazendo uma Rotação
+            self.current_sprite.height = len(self.current_sprite.grid)
+            self.current_sprite.width = len(self.current_sprite.grid[0])
+
+            # Usa draw_grid no lugar de refresh_colors para reestruturar a tela
+            self.canvas.draw_grid(self.current_sprite.width, self.current_sprite.height, self.current_sprite)
 
     def apply_flood_fill(self, start_x, start_y, target_state):
         grid = self.current_sprite.grid
@@ -297,8 +305,116 @@ class MainWindow:
                 self.sidebar.name_entry.delete(0, tk.END)
                 self.sidebar.name_entry.insert(0, novo_nome)
 
+    def action_rotate_90(self):
+        if not self.current_sprite: return
+        self.current_sprite.save_state()
+
+        old_w = self.current_sprite.width
+        old_h = self.current_sprite.height
+        new_w = old_h
+        new_h = old_w
+
+        # Cria uma nova matriz vazia com dimensões invertidas
+        new_grid = [[0 for _ in range(new_w)] for _ in range(new_h)]
+
+        # Mapeia os pixels girando 90 graus no sentido horário
+        for r in range(old_h):
+            for c in range(old_w):
+                new_grid[c][old_h - 1 - r] = self.current_sprite.grid[r][c]
+
+        self.current_sprite.width = new_w
+        self.current_sprite.height = new_h
+        self.current_sprite.grid = new_grid
+
+        # Redesenha a tela inteira (pois as proporções podem ter mudado)
+        self.canvas.draw_grid(new_w, new_h, self.current_sprite)
+
+    def action_flip_h(self):
+        if not self.current_sprite: return
+        self.current_sprite.save_state()
+
+        # Inverte os itens de cada linha horizontalmente
+        for r in range(self.current_sprite.height):
+            self.current_sprite.grid[r].reverse()
+
+        self.canvas.refresh_colors(self.current_sprite)
+
+    def action_flip_v(self):
+        if not self.current_sprite: return
+        self.current_sprite.save_state()
+
+        # Inverte a ordem das linhas de cima para baixo
+        self.current_sprite.grid.reverse()
+
+        self.canvas.refresh_colors(self.current_sprite)
+
+    def action_resize_sprite(self, index):
+        sprite_to_resize = self.sprites[index]
+
+        # Abre a caixa de diálogo pedindo o formato WxH
+        novo_tamanho = simpledialog.askstring(
+            "Redimensionar Sprite",
+            f"Tamanho atual: {sprite_to_resize.width}x{sprite_to_resize.height}\nDigite o novo tamanho (Ex: 32x32):",
+            initialvalue=f"{sprite_to_resize.width}x{sprite_to_resize.height}",
+            parent=self.root
+        )
+
+        if novo_tamanho:
+            try:
+                # Divide a string no 'x' para pegar largura e altura
+                partes = novo_tamanho.lower().split('x')
+                new_w = int(partes[0].strip())
+                new_h = int(partes[1].strip())
+            except:
+                messagebox.showerror("Erro", "Formato invalido. Use o formato numerico WxH (exemplo: 16x32).")
+                return
+
+            if new_w == sprite_to_resize.width and new_h == sprite_to_resize.height:
+                return
+
+            # Exibe o aviso exigido
+            aviso = messagebox.askyesno(
+                "Aviso de Redimensionamento",
+                "Alterar as dimensoes pode cortar e apagar permanentemente os pixels que ficarem de fora do novo tamanho.\n\nDeseja continuar?"
+            )
+
+            if not aviso:
+                return
+
+            is_current = (self.current_sprite == sprite_to_resize)
+
+            # Se o sprite alterado for o que está aberto, salva no histórico de CTRL+Z
+            if is_current:
+                self.current_sprite.save_state()
+
+            old_w = sprite_to_resize.width
+            old_h = sprite_to_resize.height
+
+            # Cria a nova grade preenchida com zeros
+            new_grid = [[0 for _ in range(new_w)] for _ in range(new_h)]
+
+            # Copia os pixels antigos para a nova matriz
+            # O min() garante que ele pare de copiar se atingir a borda antiga ou a nova
+            for r in range(min(old_h, new_h)):
+                for c in range(min(old_w, new_w)):
+                    new_grid[r][c] = sprite_to_resize.grid[r][c]
+
+            # Atualiza os dados do sprite
+            sprite_to_resize.width = new_w
+            sprite_to_resize.height = new_h
+            sprite_to_resize.grid = new_grid
+
+            # Atualiza a tela se o sprite editado for o que o usuario está olhando
+            if is_current:
+                self.sidebar.info_label.config(text=f"Tamanho: {new_w} x {new_h}")
+                self.canvas.draw_grid(new_w, new_h, self.current_sprite)
+
     def _load_sprite_to_view(self, sprite):
         self.current_sprite = sprite
         self.sidebar.name_entry.delete(0, tk.END)
         self.sidebar.name_entry.insert(0, sprite.name)
+
+        # Atualiza a label com as dimensões
+        self.sidebar.info_label.config(text=f"Tamanho: {sprite.width} x {sprite.height}")
+
         self.canvas.draw_grid(sprite.width, sprite.height, sprite)
