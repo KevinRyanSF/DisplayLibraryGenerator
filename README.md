@@ -2,7 +2,7 @@
 
 Uma ferramenta visual e open-source desenvolvida em Python (Tkinter) para engenheiros e makers. Este software permite desenhar gráficos, ícones e sprites em uma interface gráfica amigável e exportá-los automaticamente como arquivos de cabeçalho (`.h`) prontos para serem incluídos em projetos de microcontroladores (STM32, ESP32, Arduino).
 
-[![Download Executável](https://img.shields.io/badge/Download_EXE-Versão_1.0.1-blue?style=for-the-badge)](https://github.com/KevinRyanSF/DisplayLibraryGenerator/releases/latest)
+[![Download Executável](https://img.shields.io/badge/Download_EXE-Versão_1.0.2-blue?style=for-the-badge)](https://github.com/KevinRyanSF/DisplayLibraryGenerator/releases/latest)
 [![Python](https://img.shields.io/badge/Python-3.8+-yellow?style=for-the-badge&logo=python)](https://www.python.org/)
 
 ## Funcionalidades
