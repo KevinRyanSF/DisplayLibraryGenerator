@@ -1,0 +1,31 @@
+# ---------------------------------------------------
+# Ambiente de Desenvolvimento (IDE)
+# ---------------------------------------------------
+.idea/
+
+# ---------------------------------------------------
+# PyInstaller (Builds e Executáveis)
+# ---------------------------------------------------
+build/
+dist/
+*.spec
+
+# ---------------------------------------------------
+# Python (Arquivos temporários e Cache)
+# ---------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---------------------------------------------------
+# Sistema Operacional (Arquivos ocultos)
+# ---------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# ---------------------------------------------------
+# Opcional: Ignorar bibliotecas exportadas localmente
+# Se você quiser que o Git ignore os testes que você fizer
+# ---------------------------------------------------
+output/*.h
