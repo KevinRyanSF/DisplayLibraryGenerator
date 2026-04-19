@@ -6,18 +6,18 @@ import sys
 def build_project():
     print("Iniciando o processo de build do Display Library Generator...")
 
-    # Verifica se o PyInstaller está instalado, se não, instala
+    # Check if PyInstaller is installed; if not, install it
     try:
         import PyInstaller
     except ImportError:
         print("PyInstaller não encontrado. Instalando...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
 
-    # Comando de build
-    # --noconsole: Oculta a janela preta do terminal
-    # --onefile: Gera um único arquivo .exe
-    # --name: Nome do arquivo final
-    # --windowed: Garante o comportamento correto da GUI no Windows
+    # Build command configuration
+    # --noconsole: Hides the black terminal window
+    # --onefile: Generates a single .exe file
+    # --name: Name of the final executable file
+    # --windowed: Ensures correct GUI behavior on Windows
     command = [
         "pyinstaller",
         "--noconsole",
